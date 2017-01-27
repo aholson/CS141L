@@ -1,0 +1,44 @@
+
+// mov
+// bne
+// load_inc
+// xor
+// and
+// add
+// shift >>
+// ba
+
+	mov 0, %R1				// out counter
+	mov 0, %R3				// highest dial
+
+OUTER:
+
+	bne %R1, 20, end
+	load_inc %G0, %R4
+	mov %G0, %R5			// copy at outer loop counter
+	mov %0, %R8				// hamming distance temp
+	mov %R1, 1, %R2			// inner loop counter (R1+1)
+
+INNER:
+	
+	bne %R2, 20, INNER_END
+	load_inc %R5, %R6		// current data for inner loop
+	xor %R4, %R6, %R6		// getting hamming value
+
+MASK:
+
+	and 1, %R6, %R7
+	add %R7, %R8, %R8		// adding together hamming distances
+	shr %R6					// shift right
+	bne %R6, 0, MASK		
+	add %R2, 1, %R2			// inc counter
+	ble %R8, %R3, INNER
+	mov %R8, %R3			// compare and replace it >
+	ba inner
+
+INNER_END:
+
+	add %R1, 1, %R1
+	ba outer
+	end
+
