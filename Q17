@@ -1,0 +1,77 @@
+
+	// %R1 = MSB A
+	// %R2 = LSB A
+	// %R3 = B
+	// %R4 = signed bit (0 = positive, 1 = negA, 2 = negB)
+	// %R5 = least sig bit of B / temp reg 1
+	// %R6 = temp reg 2
+	// %R7 = MSB product
+	// %R8 = LSB product
+
+	mv 0, %R6
+	mv 0, %R7
+
+	ld M[1], %R1			// %R1 = MSB A
+	ld M[2], %R2			// %R2 = LSB A
+	ld M[3], %R3			// %R3 = MSB B
+	ld M[4], %R4			// %R4 = LSB B
+
+	shl %R3
+	sh1 %R3
+	shl %R3
+	shl %R3
+	add %R4, %R3			// move MSB and LSB of B to single register
+	mv %R3, %R2
+
+	mov 0x80, %R4
+	mov 0x80, %R5		
+	xor %R1, %R4			// %R4 = check signed bit of A
+	xor %R2, %R5			// %R5 = check signed bit of B
+	bne %R4, 0, NEGA		// if A is neg, abs
+	bne %R5, 0, NEGB		// if B is neg, abs
+
+NEGA:
+	
+	mov 0xFF, %R4			// take two's comp
+	xor %R4, %R1			// xor by 1's
+	mov 0x01, %R4
+	add %R4, %R1			// add 1
+	mov 0x01, %R4
+	ba SMULTIPLY
+
+NEGB:
+	
+	mov 0xFF, %R4
+	xor %R4, %R2			// xor by 1's
+	mov 0x01, %R4
+	add %R4, %R2			// add 1
+	mov 0x02, %R4
+
+SMULTIPLY:
+
+	mov 0x01, %R5
+	and %R3, %R5			// %R5 = least sig bit of B
+
+	bne %R5, 1, SHIFT		// if LSB == 0, jump
+
+	mov 0x0F, %R5	
+	and %R8, %R5			// temp = LSB[4] of final product
+	add %R2, %R5			// %R5 = add A LSB to final LSB 
+	mov 0x10, %R6
+ 	and %R5, %R6			// %R6 = overflow bit
+
+	add %R6, %R7			// add overflow to final product
+	
+
+	mov 0xF0, %R5 	
+	and %R7, %R5			// temp = MSB of final product
+	add %R1, %R8			// %R5 = add A MSB to final MSB
+
+
+SHIFT:
+
+	shl %R1
+	shr %R2
+
+	bne %R2, %R0, SMULTIPLY
+
