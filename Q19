@@ -1,8 +1,6 @@
 Instruction format
 Instruction Type
 _ _ _ 	_ _ _  _ _  |  _
-
-
 // add __  __
 // mov
 
@@ -24,7 +22,6 @@ _ _ _ 	_ _ _  _ _  |  _
 ################################################################################
 R1 - Outer counter
 R2 - Inner counter
-
 R3 - Current Max
 R4 - Current Byte of Outer Loop
 R5 - Current Byte of Inner Loop

@@ -1,0 +1,77 @@
+
+
+Project Description:
+String match (40 pts) -- Write a program that finds, in an array of unsigned
+bytes, the number of entries which contain a given 4-bit string and which
+creates a histogram of occurrence counts. For example, if the 4-bit string
+is 0101, then 11010110 would count as a single match, and 01010101 would count
+as a triple match, while 00111011 would not count as either. The array starts
+at position 32 and is 64 bytes long. The string you search for will be in the
+lower 4 bits of memory address 9. The results shall be written in locations
+10 (single match), 11 (double match), 12 (triple match), 13 (quadruple match),
+ and 14 (quintuple match).
+
+
+
+
+
+ load_inc - incs 1
+
+r0 - Holds default value 1
+r1 - Match String
+r2 - Location of 64 Byte array
+r3 - Current Byte being evaluated
+
+r4 - "Temp" reg that holds 4 LSB of current Byte
+
+r7 - "Temp" reg that holds calculated address for frequency
+r8 0 "Temp" Tally for frequency
+
+
+# Steps to add 1 without compromising an different add instruction format.
+mov             $0, $r0
+load_inc        $r0, $r1
+
+
+mov               9,  $r1
+load_inc             $r1, $r1      # Load Memory
+and              15, $r1      # Get Last 4 Bits
+mov               32, $r2
+
+
+OUTER_LOOP:
+
+    cmpB             64
+    be              EXIT
+
+    load_inc         $r2, $r3
+    # Might use increment if load_inc has undefined behavior
+
+    INNER_LOOP:
+        and      15,  $r4
+        cmp      $r1, $r4
+        bne      SKIP
+
+        add      $r0,   $r8                          incB     #Tally Frequency
+
+        SKIP:
+        shiftR   $r4,   $r4
+        incA
+        cmpA     5  # Max of 5 shifts
+        bne      INNER_LOOP
+                 # Update appropriate memory space
+        mov      9,  $r7        ### offset adds 1 extra, 10 + 5 = 15, should be 14
+        add      $r8, $r7       # Holds calculated address
+        load_inc     $r7, $r8       #recycle r8, holds running number of selected cubby
+        add      $r0,   $r8
+
+        store    $r8, $r7
+                # Reset things
+
+        mv      $0, $r8
+
+        incB
+
+        ba      OUTER_LOOP
+
+        EXIT

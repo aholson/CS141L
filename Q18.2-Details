@@ -1,0 +1,25 @@
+Instructions Used in this Program:
+# Includes variations
+# Instruction Count:
+# Dynamic Instruction Count:
+
+
+
+mv -     reg reg
+mv -     imm reg
+ld_inc
+ld
+
+and      imm reg
+cmp      reg reg flag (flag is part of )
+
+bne      amt
+add      reg reg
+
+shiftR
+incA
+incB
+
+
+Any Rules Violated?:
+- Register operands & Types?

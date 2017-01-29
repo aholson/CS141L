@@ -1,0 +1,78 @@
+
+
+Project Description:
+String match (40 pts) -- Write a program that finds, in an array of unsigned
+bytes, the number of entries which contain a given 4-bit string and which
+creates a histogram of occurrence counts. For example, if the 4-bit string
+is 0101, then 11010110 would count as a single match, and 01010101 would count
+as a triple match, while 00111011 would not count as either. The array starts
+at position 32 and is 64 bytes long. The string you search for will be in the
+lower 4 bits of memory address 9. The results shall be written in locations
+10 (single match), 11 (double match), 12 (triple match), 13 (quadruple match),
+ and 14 (quintuple match).
+
+
+ Acummulator Style
+
+
+
+Outer Loop 64 times
+Inner Loop 5 times
+Specific instructions for 5
+
+
+
+/*
+ * Initalization (3 parts)
+ * 1. Get value 1 into a register, to be used later
+ * 2. ld Match String (4LSB)
+ * 3. Get ByteArray
+
+
+
+
+# Steps to add 1 without compromising a different add instruction format.
+mv             $0, $r0
+ld_inc        $r1, $r2    # Doubles as an "add 1 instruction" to first register
+                            # $r1 has garbage value in this context
+
+mv             9,  $r5
+ld_inc        $r5,$r5
+and             15, $r5     # Get 4LSB
+
+mv             32, $r6     # Get ByteArray Address
+
+OUTER LOOP:
+
+ld_inc        $r6, $r7    # lds in one byte, and increments address
+mv             $0,  $r8
+
+  INNER LOOP:
+    and         $r5, $r7    #
+    cmp         $r5, $r7    #
+    bne         SKIP
+    add         $r1, $r8    #  Increment tally
+
+    SKIP:
+    shiftR      $r4
+
+    incB
+    cmpB 5
+    bne  INNER LOOP
+
+
+    # Store Tallied Frequency
+    mv       9,   $r3       ### offset adds 1 extra, ie. 9 + 5 = 15, should be 14
+    add      $r8, $r3       # Holds calculated address
+    ld       $r3, $r8       # Re-use tally reg for a bit
+    add      $r1, #r8       #
+    st       $r8, $r3       #
+
+    mv      $r0, $r8       # Reset tally to 0
+
+  ####
+  incA
+  cmpA 64
+  bne  OUTER LOOP:
+
+END:
