@@ -1,0 +1,103 @@
+
+
+
+
+cmpA - automatically cmps to value
+cmpB - automatically cmps to value
+
+Instruction format
+Instruction Type
+_ _ _ 	_ _ _  _ _  |  _
+
+
+// add __  __
+// mov
+
+// bne
+// ble
+// ba
+// be
+
+// load_inc
+// incA
+// incB
+// cpmA
+// cpmB
+
+// cmp
+
+// xor
+// and
+// shift >>
+
+
+################################################################################
+
+# G0
+
+
+$0 Internal register
+
+R0 - Holds Global value 1 initially
+R3 - Current Max
+R4 - Current Byte of Outer Loop
+R5 - Current Byte of Inner Loop
+R6 - Holds XOR'd result of R4 & R5
+
+R7 - LSB of R6
+
+R8 - Holds Hammond distance for current pair of Bytes
+$acc (internal reg)
+
+# Steps to add 1 without compromising an different add instruction format.
+	mov             $0, $r0
+	load_inc        $r0, $r1
+
+
+	mov $0, %R3				// highest dial
+  mov 128, $R1       // Initial Address
+
+
+OUTER:
+  cmpA 20
+	bne end
+	load_inc %R1, %R4 // Load Inc
+	mov %R1, %R5			// copy at outer loop counter
+	mov %0, %R8				// hamming distance temp  ***
+	incA              // inner loop counter (R1+1)
+
+INNER:
+  cmpB 20
+	bne INNER_END
+	load_inc %R5, %R6		// current data for inner loop
+	xor %R4, %R6	// getting hamming value
+
+MASK:
+	mov $R6, $R7
+	and 1, %R7
+	add %R7, %R8 // adding together hamming distances TEMP ***
+	shiftR %R6, $R6					// shift right
+	cmp %R6, $0
+	bne MASK
+
+  incB
+  cmp %R8, %R3
+	ble INNER
+	mov %R8, %R3			// compare and replace it >
+	ba  INNER
+
+INNER_END:
+  incA
+	ba  OUTER
+	end
+
+Instructions (14)
+################################################################################
+
+
+TypeX ---> Stores in Acc
+_ _ _ _  _ _ _  | _ _
+OP code  Reg      Immediate
+
+Comp
+AND (type 1)

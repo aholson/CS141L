@@ -1,36 +1,63 @@
-
+Instruction format
+Instruction Type
+_ _ _ 	_ _ _  _ _  |  _
+// add __  __
 // mov
+
 // bne
-// load_inc
+// ba
+
+// load_inc_
+// incA
+// incB
+
+
+
 // xor
 // and
-// add
 // shift >>
 // ba
 
+
+################################################################################
+R1 - Outer counter
+R2 - Inner counter
+R3 - Current Max
+R4 - Current Byte of Outer Loop
+R5 - Current Byte of Inner Loop
+R6 - Holds XOR'd result of R4 & R5
+
+R7 - LSB of R6
+
+R8 - Holds Hammond distance for current pair of Bytes
+
+
+
 	mov 0, %R1				// out counter
 	mov 0, %R3				// highest dial
+
 
 OUTER:
 
 	bne %R1, 20, end
 	load_inc %G0, %R4
 	mov %G0, %R5			// copy at outer loop counter
-	mov %0, %R8				// hamming distance temp
+	mov %0, %R8				// hamming distance temp  ***
 	mov %R1, 1, %R2			// inner loop counter (R1+1)
 
 INNER:
-	
+
 	bne %R2, 20, INNER_END
 	load_inc %R5, %R6		// current data for inner loop
 	xor %R4, %R6, %R6		// getting hamming value
 
 MASK:
-
 	and 1, %R6, %R7
-	add %R7, %R8, %R8		// adding together hamming distances
+
+	add %R7, %R8, %R8		// adding together hamming distances TEMP ***
 	shr %R6					// shift right
-	bne %R6, 0, MASK		
+	bne %R6, 0, MASK
+
 	add %R2, 1, %R2			// inc counter
 	ble %R8, %R3, INNER
 	mov %R8, %R3			// compare and replace it >
@@ -41,4 +68,3 @@ INNER_END:
 	add %R1, 1, %R1
 	ba outer
 	end
-
