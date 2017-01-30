@@ -1,6 +1,7 @@
 
 // mov
 // ld
+// st
 // shl
 // shr
 // add
@@ -146,15 +147,55 @@ SHIFT:
 
 	bne %R4, 0, STORE		// if unsigned
 
+	// if signed, take two's comp and add 1
+
 	mov 0xFF, %R5
 	xor %R5, %R7			// take two's comp: xor by 1's
 	xor %R5, %R8
 
-// add 1 and store
+	mov 0x01, %R5			
+	mov 0x0F, %R6
+	and %R8, %R6			// ---- LSB[R8] 
+	add %R5, %R6			// ---- LSB[R8]+1
 
-	mov 0x01, %R5
+	mov 0xF0, %R5
+	and %R8, %R5			// MSB[R8] ----
+	shr %R5
+	shr %R5
+	shr %R5
+	shr %R5					// ---- MSB[R8]
 
-	add %R5, %R8			// add 1
+	mov %R6, %R8 			// move LSB[R8] + 1 to R8
+
+	mov 0xF0, %R6
+	and %R8, %R6			// OV[LSB] ----
+	shr %R6
+	shr %R6
+	shr %R6					
+	shr %R6					// ---- OV[LSB]
+
+	add %R6, %R5			// OV[LSB] + MSB[R8]
+
+	mov %0F, %R6			// clear MSB of R8
+	and %R6, %R8 			// R8 = ---- LSB[R8]+1			
+
+	mov %0F, %R6
+	and %R5, %R6			// ---- OV[LSB]+MSB[R8]
+	shl %R6
+	shl %R6
+	shl %R6
+	shl %R6					// MSB[R8]+OV[LSB] ----
+
+	add %R6, %R8 			// MSB[R8]+OV[LSB]	LSB[R8]+1 
+
+	shr %R5
+	shr %R5
+	shr %R5
+	shr %R5					// ---- OV[MSB]
+
+	add %R5, %R7			// OV[MSB] + R7
 
 STORE:
 
+	st %R7, M[5]
+	st %R8, M[6]
